@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Futebol e Amizade 🏆⚽️</title>
+    
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Futebol App">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .glass-panel { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .tab-active { color: #22c55e; border-top: 2px solid #22c55e; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col pb-20 selection:bg-emerald-500 selection:text-white">
+
+    <!-- Header Topo -->
+    <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3 flex justify-between items-center shadow-lg">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-green-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-emerald-500/20">
+                🏆
+            </div>
+            <div>
+                <h1 class="font-bold text-base leading-none text-white tracking-wide">Futebol e Amizade</h1>
+                <p class="text-[11px] text-slate-400 font-medium mt-0.5" id="header-status-badge">Carregando...</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-2">
+            <button id="btn-install-app" onclick="installPWA()" class="hidden px-2.5 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30 transition flex items-center space-x-1 animate-pulse">
+                <i class="fa-solid fa-download"></i>
+                <span class="hidden sm:inline">Baixar</span> App
+            </button>
+
+            <button id="admin-login-btn" onclick="handleAdminBtnClick()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 border border-slate-700 transition flex items-center space-x-1.5">
+                <i id="admin-btn-icon" class="fa-solid fa-lock text-emerald-400"></i>
+                <span id="admin-btn-text">Admin</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="flex-1 max-w-md w-full mx-auto p-4 space-y-5">
+
+        <!-- TAB 1: INÍCIO -->
+        <section id="tab-inicio" class="tab-content space-y-4">
+            <div class="glass-panel rounded-2xl p-5 shadow-xl relative overflow-hidden">
+                <div class="flex justify-between items-start mb-3">
+                    <span id="match-status-badge" class="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                        Jogo Confirmado
+                    </span>
+                </div>
+                
+                <h2 class="text-xl font-bold text-white mb-2" id="display-local">Quadra do Society Club</h2>
+                <div class="grid grid-cols-2 gap-3 text-sm text-slate-300 my-4">
+                    <div><i class="fa-regular fa-calendar text-emerald-400"></i> <span id="display-data">Terça-Feira</span></div>
+                    <div><i class="fa-regular fa-clock text-emerald-400"></i> <span id="display-horario">19:00 - 20:30</span></div>
+                    <div><i class="fa-solid fa-dollar-sign text-emerald-400"></i> <span id="display-valor">R$ 20,00</span></div>
+                    <div><i class="fa-solid fa-users text-emerald-400"></i> Vagas: <span id="display-vagas">0/14</span></div>
+                </div>
+
+                <!-- Módulo Pix -->
+                <div class="bg-slate-900/90 rounded-xl p-3 border border-slate-800 space-y-2">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-400 font-semibold"><i class="fa-brands fa-pix text-emerald-400"></i> Pagamento via Pix:</span>
+                        <span class="text-slate-300 font-mono text-[11px]" id="display-pix">pix@futebol.com</span>
+                    </div>
+                    <button onclick="copyPix()" class="w-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2">
+                        <i class="fa-regular fa-copy"></i> Copiar Chave Pix
+                    </button>
+                </div>
+
+                <!-- Painel Admin: Gerenciar Pelada -->
+                <div id="admin-match-controls" class="mt-4 pt-4 border-t border-slate-800 hidden space-y-3">
+                    <p class="text-xs font-bold text-amber-400 uppercase tracking-wider"><i class="fa-solid fa-gear mr-1"></i> Painel do Admin</p>
+                    <div class="space-y-2">
+                        <input type="text" id="edit-local" placeholder="Local" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="edit-data" placeholder="Data/Dia" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white">
+                            <input type="text" id="edit-horario" placeholder="Horário" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="edit-pix" placeholder="Chave Pix" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white">
+                            <input type="number" id="edit-limite" placeholder="Limite Vagas (Ex: 14)" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white">
+                        </div>
+                        <button onclick="saveMatchDetails()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2 rounded-xl text-xs transition">
+                            <i class="fa-solid fa-check mr-1"></i> Salvar Detalhes
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card de Login e Solicitação -->
+            <div id="user-auth-box" class="glass-panel rounded-2xl p-4 space-y-3">
+                <h3 class="font-bold text-white text-sm">Acesso do Jogador</h3>
+                <div class="space-y-2">
+                    <input type="text" id="user-name-input" placeholder="Seu Nome Completo" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                    
+                    <div class="flex items-center space-x-2">
+                        <input type="checkbox" id="remember-user" checked class="rounded bg-slate-900 border-slate-700 text-emerald-500 focus:ring-0">
+                        <label for="remember-user" class="text-[11px] text-slate-400">Lembrar acesso neste celular</label>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <button onclick="loginAsPlayer()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2 rounded-xl text-xs transition">Entrar no App</button>
+                        <button onclick="submitAccessRequest()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2 rounded-xl text-xs transition">Pedir Cadastro ao ADM</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB NORE: MEU PERFIL (SÓ APARECE PÓS-APROVAÇÃO E LOGIN) -->
+        <section id="tab-perfil" class="tab-content hidden space-y-4">
+            <div id="user-logged-card" class="glass-panel rounded-2xl p-5 space-y-4 border-l-4 border-l-emerald-500">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div class="flex items-center space-x-3">
+                        <div id="logged-avatar-container" class="w-14 h-14 rounded-full overflow-hidden bg-slate-800 border-2 border-emerald-500 flex items-center justify-center shadow-lg">
+                            <!-- Foto Renderizada JS -->
+                        </div>
+                        <div>
+                            <span class="text-[10px] bg-emerald-500/20 text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-500/30">Atleta Aprovado ✅</span>
+                            <h4 class="font-bold text-white text-lg mt-0.5" id="logged-player-name">--</h4>
+                        </div>
+                    </div>
+                    <button onclick="logoutPlayer()" class="bg-slate-800 hover:bg-slate-700 text-red-400 text-xs px-3 py-2 rounded-xl border border-slate-700 font-semibold transition">
+                        <i class="fa-solid fa-right-from-bracket mr-1"></i> Sair
+                    </button>
+                </div>
+
+                <!-- Formulário de Perfil do Jogador -->
+                <div class="bg-slate-900/90 rounded-xl p-4 border border-slate-800 space-y-4">
+                    <h5 class="text-xs font-bold text-emerald-400 flex items-center gap-2">
+                        <i class="fa-solid fa-user-pen"></i> Editar Minha Ficha de Jogador
+                    </h5>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] text-slate-300 font-medium mb-1">Pé Dominante</label>
+                            <select id="profile-foot-input" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white focus:border-emerald-500">
+                                <option value="Destro">Destro 🦶</option>
+                                <option value="Canhoto">Canhoto 🦶</option>
+                                <option value="Ambidestro">Ambidestro 🦶</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-300 font-medium mb-1">Posição Principal</label>
+                            <select id="profile-pos-input" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white focus:border-emerald-500">
+                                <option value="Linha">Linha ⚽️</option>
+                                <option value="Goleiro">Goleiro 🧤</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] text-slate-300 font-medium mb-1">Foto de Perfil</label>
+                        <input type="file" id="profile-photo-input" accept="image/*" class="w-full text-xs text-slate-400 bg-slate-950 border border-slate-700 rounded-lg p-1.5 file:mr-2 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-emerald-500/20 file:text-emerald-400">
+                    </div>
+
+                    <button onclick="savePlayerProfile()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition shadow-lg shadow-emerald-600/20">
+                        Salvar Alterações de Perfil
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: PRESENÇA -->
+        <section id="tab-presenca" class="tab-content hidden space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-lg text-white">Lista de Confirmados</h3>
+                <span class="text-xs text-slate-400" id="presence-counter">0 Confirmados</span>
+            </div>
+            
+            <div id="players-list" class="space-y-2"></div>
+
+            <!-- Lista de Espera -->
+            <div id="waiting-list-container" class="pt-4 border-t border-slate-800 space-y-2 hidden">
+                <h4 class="font-bold text-sm text-amber-400 flex items-center gap-2">
+                    <i class="fa-solid fa-clock"></i> Lista de Espera (Fila)
+                </h4>
+                <div id="waiting-list" class="space-y-2"></div>
+            </div>
+        </section>
+
+        <!-- TAB 3: VER TIMES -->
+        <section id="tab-ver-times" class="tab-content hidden space-y-4">
+            <h3 class="font-bold text-lg text-white flex items-center gap-2">
+                <i class="fa-solid fa-shirt text-emerald-400"></i> Times Sorteados
+            </h3>
+            <div id="drawn-teams-container" class="space-y-4">
+                <p class="text-xs text-slate-400 text-center py-6">Nenhum sorteio foi realizado ainda para o próximo jogo.</p>
+            </div>
+        </section>
+
+        <!-- TAB 4: ESTATÍSTICAS (RANKING & CRAQUE) -->
+        <section id="tab-stats" class="tab-content hidden space-y-4">
+            <h3 class="font-bold text-lg text-white flex items-center gap-2">
+                <i class="fa-solid fa-chart-simple text-emerald-400"></i> Estatísticas da Temporada
+            </h3>
+
+            <!-- Votação Craque do Dia -->
+            <div class="glass-panel rounded-2xl p-4 border-l-4 border-l-amber-400 space-y-3">
+                <h4 class="font-bold text-white text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-star text-amber-400"></i> Eleição Craque da Rodada (MVP)
+                </h4>
+                <p class="text-xs text-slate-400">Vote no melhor jogador da última partida:</p>
+                
+                <div class="flex gap-2">
+                    <select id="mvp-vote-select" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                        <!-- Preenchido via JS -->
+                    </select>
+                    <button onclick="submitMvpVote()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-2 rounded-xl text-xs">Votar</button>
+                </div>
+                <p id="mvp-winner" class="text-xs font-bold text-amber-300 mt-1"></p>
+            </div>
+
+            <!-- Tabela Artilharia -->
+            <div class="glass-panel rounded-2xl p-4 space-y-3">
+                <h4 class="font-bold text-white text-sm flex justify-between items-center">
+                    <span><i class="fa-solid fa-futbol text-emerald-400 mr-1.5"></i> Artilharia & Garçons</span>
+                </h4>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="bg-slate-900 text-slate-400 uppercase text-[10px]">
+                            <tr>
+                                <th class="p-2">Jogador</th>
+                                <th class="p-2 text-center">Pé</th>
+                                <th class="p-2 text-center">Gols</th>
+                                <th class="p-2 text-center">Assis.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stats-table-body" class="divide-y divide-slate-800">
+                            <!-- Preenchido via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 5: SORTEIO (Exclusivo Admin) -->
+        <section id="tab-sorteio" class="tab-content hidden space-y-4">
+            <div class="glass-panel rounded-2xl p-4 space-y-3">
+                <h3 class="font-bold text-white text-base">Gerador de Times Balanceado</h3>
+                <p class="text-xs text-slate-400">Sorteio inteligente considerando a nota de cada jogador para equilibrar as equipes.</p>
+                <div class="flex space-x-2">
+                    <input type="number" id="num-teams" value="2" min="2" max="4" class="w-20 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-center text-white">
+                    <button onclick="runBalancedDraw()" class="flex-1 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-slate-950 font-extrabold rounded-xl text-sm uppercase">🎲 Sortear Balanced</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 6: PAINEL ADMIN -->
+        <section id="tab-admin" class="tab-content hidden space-y-5">
+            <div class="glass-panel rounded-2xl p-4 space-y-3 border-l-4 border-l-amber-500">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-white text-sm"><i class="fa-solid fa-user-clock text-amber-400 mr-1.5"></i> Pedidos de Entrada Pendentes</h3>
+                    <span id="requests-badge" class="bg-amber-500/20 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-500/30">0 Pendentes</span>
+                </div>
+                <div id="requests-list" class="space-y-2"></div>
+            </div>
+
+            <!-- Adicionar Jogador -->
+            <div class="glass-panel rounded-2xl p-4 space-y-3">
+                <h3 class="font-bold text-white text-sm"><i class="fa-solid fa-user-plus text-emerald-400 mr-1.5"></i> Adicionar Jogador Manualmente</h3>
+                <div class="space-y-2">
+                    <input type="text" id="add-player-name" placeholder="Nome do Jogador" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                    <div class="grid grid-cols-3 gap-2">
+                        <select id="add-player-foot" class="bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 text-xs text-slate-300">
+                            <option value="Destro">Destro</option>
+                            <option value="Canhoto">Canhoto</option>
+                            <option value="Ambidestro">Ambidestro</option>
+                        </select>
+                        <select id="add-player-pos" class="bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 text-xs text-slate-300">
+                            <option value="Linha">Linha</option>
+                            <option value="Goleiro">Goleiro</option>
+                        </select>
+                        <select id="add-player-stars" class="bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 text-xs text-slate-300">
+                            <option value="3">⭐ 3 (Médio)</option>
+                            <option value="5">⭐ 5 (Craque)</option>
+                            <option value="4">⭐ 4 (Bom)</option>
+                            <option value="2">⭐ 2 (Comum)</option>
+                            <option value="1">⭐ 1 (Perreco)</option>
+                        </select>
+                    </div>
+                    <button onclick="addPlayerManual()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2 rounded-xl text-xs transition">Cadastrar Atleta</button>
+                </div>
+            </div>
+
+            <!-- Gestão de Atletas -->
+            <div class="glass-panel rounded-2xl p-4 space-y-3">
+                <h3 class="font-bold text-white text-sm"><i class="fa-solid fa-sliders text-blue-400 mr-1.5"></i> Gestão de Atletas & Estatísticas</h3>
+                <div id="active-members-admin-list" class="space-y-2 max-h-60 overflow-y-auto"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Bottom Navigation Bar (Menu Inferior Dinâmico) -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 max-w-md mx-auto">
+        <div class="flex justify-around items-center h-16 px-1">
+            <button onclick="switchTab('inicio')" id="btn-tab-inicio" class="flex-1 flex flex-col items-center justify-center py-2 text-emerald-400 tab-active transition">
+                <i class="fa-solid fa-house-chimney text-base"></i>
+                <span class="text-[9px] font-semibold mt-1">Início</span>
+            </button>
+            <button onclick="switchTab('presenca')" id="btn-tab-presenca" class="flex-1 flex flex-col items-center justify-center py-2 text-slate-400 transition">
+                <i class="fa-solid fa-clipboard-user text-base"></i>
+                <span class="text-[9px] font-semibold mt-1">Presença</span>
+            </button>
+            
+            <!-- ABA DINÂMICA DE PERFIL (Só aparece após aprovação/login) -->
+            <button onclick="switchTab('perfil')" id="btn-tab-perfil" class="flex-1 flex-col items-center justify-center py-2 text-slate-400 transition hidden">
+                <i class="fa-solid fa-id-card text-base text-emerald-400"></i>
+                <span class="text-[9px] font-semibold mt-1 text-emerald-400">Meu Perfil</span>
+            </button>
+
+            <button onclick="switchTab('ver-times')" id="btn-tab-ver-times" class="flex-1 flex flex-col items-center justify-center py-2 text-slate-400 transition">
+                <i class="fa-solid fa-shirt text-base"></i>
+                <span class="text-[9px] font-semibold mt-1">Times</span>
+            </button>
+            <button onclick="switchTab('stats')" id="btn-tab-stats" class="flex-1 flex flex-col items-center justify-center py-2 text-slate-400 transition">
+                <i class="fa-solid fa-ranking-star text-base"></i>
+                <span class="text-[9px] font-semibold mt-1">Stats</span>
+            </button>
+
+            <!-- Exclusivos Admin -->
+            <button onclick="switchTab('sorteio')" id="btn-tab-sorteio" class="flex-1 flex-col items-center justify-center py-2 text-slate-400 transition hidden">
+                <i class="fa-solid fa-dice text-base text-amber-400"></i>
+                <span class="text-[9px] font-semibold mt-1 text-amber-400">Sortear</span>
+            </button>
+            <button onclick="switchTab('admin')" id="btn-tab-admin" class="flex-1 flex-col items-center justify-center py-2 text-slate-400 transition hidden">
+                <i class="fa-solid fa-shield-halved text-base text-amber-400"></i>
+                <span class="text-[9px] font-semibold mt-1 text-amber-400">Admin</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Modal Admin (PIN) -->
+    <div id="modal-admin" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-panel w-full max-w-xs rounded-2xl p-5 space-y-4 shadow-2xl border border-slate-700">
+            <div class="text-center">
+                <h3 class="font-bold text-white text-lg">Acesso Administrador</h3>
+                <p class="text-xs text-slate-400 mt-1">Digite a senha PIN (Padrão: 1234)</p>
+            </div>
+            <input type="password" id="admin-pin-input" placeholder="Senha PIN" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-center text-lg font-mono text-white focus:border-emerald-500 focus:outline-none tracking-widest">
+            <div class="flex items-center space-x-2">
+                <input type="checkbox" id="remember-admin" class="rounded bg-slate-900 border-slate-700 text-emerald-500 focus:ring-0">
+                <label for="remember-admin" class="text-[11px] text-slate-400">Lembrar acesso</label>
+            </div>
+            <div class="flex space-x-2">
+                <button onclick="toggleAdminModal()" class="flex-1 py-2.5 bg-slate-800 text-slate-300 font-semibold rounded-xl text-xs">Cancelar</button>
+                <button onclick="verifyAdminPin()" class="flex-1 py-2.5 bg-emerald-600 text-slate-950 font-bold rounded-xl text-xs">Entrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Logout Admin -->
+    <div id="modal-logout-admin" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-panel w-full max-w-xs rounded-2xl p-5 space-y-4 shadow-2xl border border-slate-700 text-center">
+            <div class="w-12 h-12 bg-amber-500/10 text-amber-400 rounded-full flex items-center justify-center mx-auto text-xl border border-amber-500/20">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-white text-base">Sair do Modo Admin?</h3>
+            </div>
+            <div class="flex space-x-2 pt-2">
+                <button onclick="toggleLogoutModal()" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs">Não</button>
+                <button onclick="confirmAdminLogout()" class="flex-1 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs">Sair</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script de Lógica -->
+    <script>
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const installBtn = document.getElementById('btn-install-app');
+            if (installBtn) installBtn.classList.remove('hidden');
+        });
+
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        document.getElementById('btn-install-app').classList.add('hidden');
+                    }
+                    deferredPrompt = null;
+                });
+            } else {
+                alert("Para instalar no iOS (iPhone):\n1. Toque no botão de Compartilhar\n2. Escolha 'Adicionar à Tela de Início'");
+            }
+        }
+
+        let state = {
+            adminLevel: 0,
+            pinAdm: "1234",
+            loggedPlayerId: null,
+            matchInfo: {
+                local: "Quadra do Society Club",
+                data: "Terça-Feira",
+                horario: "19:00 - 20:30",
+                pix: "pix@futebol.com",
+                maxVagas: 14
+            },
+            requests: [],
+            mvpVotes: {},
+            players: [
+                { id: 1, name: "João Silva", foot: "Destro", pos: "Linha", stars: 4, photo: null, confirmed: true, paid: true, goals: 5, assists: 2, approved: true },
+                { id: 2, name: "Lucas Mendes", foot: "Canhoto", pos: "Linha", stars: 5, photo: null, confirmed: true, paid: false, goals: 8, assists: 4, approved: true },
+                { id: 3, name: "Gabriel Souza", foot: "Destro", pos: "Goleiro", stars: 4, photo: null, confirmed: true, paid: true, goals: 0, assists: 1, approved: true },
+                { id: 4, name: "Matheus Lima", foot: "Ambidestro", pos: "Linha", stars: 3, photo: null, confirmed: true, paid: false, goals: 2, assists: 3, approved: true }
+            ],
+            teams: []
+        };
+
+        function initApp() {
+            const savedAdmin = localStorage.getItem('saved_admin_level');
+            const savedPlayerId = localStorage.getItem('saved_player_id');
+
+            if (savedAdmin) {
+                state.adminLevel = parseInt(savedAdmin, 10);
+            } else if (savedPlayerId) {
+                const player = state.players.find(p => p.id == savedPlayerId);
+                if (player) state.loggedPlayerId = player.id;
+            }
+
+            applyAdminStateUI();
+            renderData();
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('text-emerald-400', 'tab-active');
+                btn.classList.add('text-slate-400');
+            });
+            const activeBtn = document.getElementById('btn-tab-' + tabId);
+            if(activeBtn) {
+                activeBtn.classList.remove('text-slate-400');
+                activeBtn.classList.add('text-emerald-400', 'tab-active');
+            }
+        }
+
+        function handleAdminBtnClick() {
+            if (state.adminLevel === 1) {
+                toggleLogoutModal();
+            } else {
+                toggleAdminModal();
+            }
+        }
+
+        function toggleAdminModal() {
+            document.getElementById('modal-admin').classList.toggle('hidden');
+            document.getElementById('admin-pin-input').value = "";
+        }
+
+        function toggleLogoutModal() {
+            document.getElementById('modal-logout-admin').classList.toggle('hidden');
+        }
+
+        function confirmAdminLogout() {
+            state.adminLevel = 0;
+            localStorage.removeItem('saved_admin_level');
+            toggleLogoutModal();
+            applyAdminStateUI();
+            switchTab('inicio');
+            renderData();
+        }
+
+        function applyAdminStateUI() {
+            const badge = document.getElementById('header-status-badge');
+            const adminControls = document.getElementById('admin-match-controls');
+            const adminTabBtn = document.getElementById('btn-tab-admin');
+            const sorteioTabBtn = document.getElementById('btn-tab-sorteio');
+            const perfilTabBtn = document.getElementById('btn-tab-perfil');
+            const adminBtnText = document.getElementById('admin-btn-text');
+            const adminBtnIcon = document.getElementById('admin-btn-icon');
+
+            if (state.adminLevel === 1) {
+                badge.innerText = "Modo Admin";
+                badge.className = "text-[11px] text-emerald-400 font-semibold mt-0.5";
+                
+                adminBtnText.innerText = "Sair Admin";
+                adminBtnIcon.className = "fa-solid fa-right-from-bracket text-red-400";
+                
+                adminControls.classList.remove('hidden');
+                adminTabBtn.classList.remove('hidden');
+                adminTabBtn.classList.add('flex');
+                sorteioTabBtn.classList.remove('hidden');
+                sorteioTabBtn.classList.add('flex');
+                perfilTabBtn.classList.add('hidden');
+            } else if (state.loggedPlayerId) {
+                const p = state.players.find(x => x.id === state.loggedPlayerId);
+                badge.innerText = `Jogador: ${p ? p.name : ''}`;
+                badge.className = "text-[11px] text-blue-400 font-semibold mt-0.5";
+                
+                adminBtnText.innerText = "Admin";
+                adminBtnIcon.className = "fa-solid fa-lock text-emerald-400";
+                
+                adminControls.classList.add('hidden');
+                adminTabBtn.classList.add('hidden');
+                sorteioTabBtn.classList.add('hidden');
+                
+                // LIBERA A ABA DE PERFIL APENAS QUANDO O ATLETA ESTÁ LOGADO/APROVADO
+                perfilTabBtn.classList.remove('hidden');
+                perfilTabBtn.classList.add('flex');
+            } else {
+                badge.innerText = "Modo Convidado";
+                badge.className = "text-[11px] text-slate-400 font-medium mt-0.5";
+                
+                adminBtnText.innerText = "Admin";
+                adminBtnIcon.className = "fa-solid fa-lock text-emerald-400";
+                
+                adminControls.classList.add('hidden');
+                adminTabBtn.classList.add('hidden');
+                sorteioTabBtn.classList.add('hidden');
+                perfilTabBtn.classList.add('hidden');
+            }
+        }
+
+        function verifyAdminPin() {
+            const pin = document.getElementById('admin-pin-input').value;
+            const remember = document.getElementById('remember-admin').checked;
+
+            if(pin === state.pinAdm) {
+                state.adminLevel = 1;
+                if (remember) localStorage.setItem('saved_admin_level', '1');
+                applyAdminStateUI();
+                toggleAdminModal();
+                switchTab('admin');
+                renderData();
+            } else {
+                alert("Senha incorreta!");
+            }
+        }
+
+        function processPhotoInput(fileInput, callback) {
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    callback(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                callback(null);
+            }
+        }
+
+        function loginAsPlayer() {
+            const name = document.getElementById('user-name-input').value.trim();
+            const remember = document.getElementById('remember-user').checked;
+
+            if(!name) return alert("Digite seu nome!");
+
+            let player = state.players.find(p => p.name.toLowerCase() === name.toLowerCase() && p.approved);
+            
+            if(player) {
+                state.loggedPlayerId = player.id;
+                if (remember) localStorage.setItem('saved_player_id', player.id);
+                applyAdminStateUI();
+                renderData();
+                switchTab('perfil'); // Redireciona para a nova aba Meu Perfil
+            } else {
+                alert("Jogador não encontrado ou o seu cadastro ainda está Pendente de Aprovação pelo ADM.");
+            }
+        }
+
+        function logoutPlayer() {
+            state.loggedPlayerId = null;
+            localStorage.removeItem('saved_player_id');
+            applyAdminStateUI();
+            switchTab('inicio');
+            renderData();
+        }
+
+        function submitAccessRequest() {
+            const name = document.getElementById('user-name-input').value.trim();
+
+            if(!name) return alert("Digite o seu nome para pedir cadastro ao ADM!");
+            
+            state.requests.push({ id: Date.now(), name: name });
+            alert("Solicitação enviada com sucesso! Aguarde a aprovação do ADM.");
+            document.getElementById('user-name-input').value = "";
+            renderData();
+        }
+
+        function savePlayerProfile() {
+            if (!state.loggedPlayerId) return;
+            
+            const player = state.players.find(p => p.id === state.loggedPlayerId);
+            if (!player) return;
+
+            const foot = document.getElementById('profile-foot-input').value;
+            const pos = document.getElementById('profile-pos-input').value;
+            const photoInput = document.getElementById('profile-photo-input');
+
+            player.foot = foot;
+            player.pos = pos;
+
+            processPhotoInput(photoInput, (photoData) => {
+                if (photoData) player.photo = photoData;
+                alert("Perfil e foto atualizados com sucesso!");
+                renderData();
+            });
+        }
+
+        function toggleSelfConfirmation(id) {
+            if(state.adminLevel === 0 && state.loggedPlayerId !== id) {
+                return alert("Você só pode confirmar ou desmarcar a sua própria presença!");
+            }
+
+            const player = state.players.find(p => p.id === id);
+            if(player) {
+                player.confirmed = !player.confirmed;
+                renderData();
+            }
+        }
+
+        function togglePaymentStatus(id) {
+            if(state.adminLevel !== 1) return;
+            const player = state.players.find(p => p.id === id);
+            if(player) {
+                player.paid = !player.paid;
+                renderData();
+            }
+        }
+
+        function addGoal(id, amount) {
+            if(state.adminLevel !== 1) return;
+            const player = state.players.find(p => p.id === id);
+            if(player) {
+                player.goals = Math.max(0, (player.goals || 0) + amount);
+                renderData();
+            }
+        }
+
+        function addAssist(id, amount) {
+            if(state.adminLevel !== 1) return;
+            const player = state.players.find(p => p.id === id);
+            if(player) {
+                player.assists = Math.max(0, (player.assists || 0) + amount);
+                renderData();
+            }
+        }
+
+        function runBalancedDraw() {
+            if(state.adminLevel === 0) return;
+
+            const confirmedPlayers = state.players.filter(p => p.confirmed);
+            if(confirmedPlayers.length < 2) {
+                return alert("É necessário ter pelo menos 2 jogadores confirmados para sortear.");
+            }
+
+            const numTeams = parseInt(document.getElementById('num-teams').value, 10) || 2;
+            const sorted = [...confirmedPlayers].sort((a, b) => (b.stars || 3) - (a.stars || 3));
+            
+            state.teams = Array.from({ length: numTeams }, () => []);
+            let teamScores = new Array(numTeams).fill(0);
+
+            sorted.forEach(player => {
+                let minTeamIndex = teamScores.indexOf(Math.min(...teamScores));
+                state.teams[minTeamIndex].push(player);
+                teamScores[minTeamIndex] += (player.stars || 3);
+            });
+
+            alert("Times sorteados e equilibrados por nível técnico!");
+            renderData();
+            switchTab('ver-times');
+        }
+
+        function copyPix() {
+            navigator.clipboard.writeText(state.matchInfo.pix);
+            alert("Chave Pix copiada!");
+        }
+
+        function submitMvpVote() {
+            const select = document.getElementById('mvp-vote-select');
+            const votedId = select.value;
+            if(!votedId) return;
+
+            state.mvpVotes[votedId] = (state.mvpVotes[votedId] || 0) + 1;
+            
+            let topId = null;
+            let maxVotes = 0;
+            for(let id in state.mvpVotes) {
+                if(state.mvpVotes[id] > maxVotes) {
+                    maxVotes = state.mvpVotes[id];
+                    topId = id;
+                }
+            }
+
+            const winner = state.players.find(p => p.id == topId);
+            if(winner) {
+                document.getElementById('mvp-winner').innerText = `⭐ Líder Atual: ${winner.name} (${maxVotes} votos)`;
+            }
+            alert("Voto computado com sucesso!");
+        }
+
+        function saveMatchDetails() {
+            if(state.adminLevel !== 1) return;
+            const local = document.getElementById('edit-local').value.trim();
+            const data = document.getElementById('edit-data').value.trim();
+            const horario = document.getElementById('edit-horario').value.trim();
+            const pix = document.getElementById('edit-pix').value.trim();
+            const limite = parseInt(document.getElementById('edit-limite').value, 10);
+
+            if(local) state.matchInfo.local = local;
+            if(data) state.matchInfo.data = data;
+            if(horario) state.matchInfo.horario = horario;
+            if(pix) state.matchInfo.pix = pix;
+            if(limite) state.matchInfo.maxVagas = limite;
+
+            alert("Detalhes atualizados!");
+            renderData();
+        }
+
+        function acceptRequest(id) {
+            const req = state.requests.find(r => r.id === id);
+            if(req) {
+                state.players.push({ 
+                    id: req.id, 
+                    name: req.name, 
+                    foot: 'Destro', 
+                    pos: 'Linha', 
+                    stars: 3, 
+                    photo: null, 
+                    confirmed: false, 
+                    paid: false, 
+                    goals: 0, 
+                    assists: 0, 
+                    approved: true 
+                });
+                state.requests = state.requests.filter(r => r.id !== id);
+                renderData();
+            }
+        }
+
+        function addPlayerManual() {
+            const name = document.getElementById('add-player-name').value.trim();
+            const foot = document.getElementById('add-player-foot').value;
+            const pos = document.getElementById('add-player-pos').value;
+            const stars = parseInt(document.getElementById('add-player-stars').value, 10);
+
+            if(!name) return;
+            state.players.push({ id: Date.now(), name, foot, pos, stars, photo: null, confirmed: false, paid: false, goals: 0, assists: 0, approved: true });
+            document.getElementById('add-player-name').value = "";
+            renderData();
+        }
+
+        function getAvatarHtml(player, sizeClass = "w-8 h-8") {
+            if (player && player.photo) {
+                return `<img src="${player.photo}" class="${sizeClass} rounded-full object-cover border border-emerald-500/50 shadow">`;
+            } else {
+                return `
+                    <div class="${sizeClass} rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-amber-400 text-xs shadow" title="Perfil Pendente de Foto">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                `;
+            }
+        }
+
+        function renderData() {
+            // Infos do Topo
+            document.getElementById('display-local').innerText = state.matchInfo.local;
+            document.getElementById('display-data').innerText = state.matchInfo.data;
+            document.getElementById('display-horario').innerText = state.matchInfo.horario;
+            document.getElementById('display-pix').innerText = state.matchInfo.pix;
+
+            // Separação Lista Principal x Lista de Espera
+            const confirmedPlayers = state.players.filter(p => p.confirmed);
+            const mainList = confirmedPlayers.slice(0, state.matchInfo.maxVagas);
+            const waitingList = confirmedPlayers.slice(state.matchInfo.maxVagas);
+
+            document.getElementById('display-vagas').innerText = `${mainList.length}/${state.matchInfo.maxVagas}`;
+            document.getElementById('presence-counter').innerText = `${mainList.length} Vagas Preenchidas`;
+
+            // Login / User Box / Aba de Perfil Liberada
+            const authBox = document.getElementById('user-auth-box');
+            
+            if (state.loggedPlayerId) {
+                const player = state.players.find(p => p.id === state.loggedPlayerId);
+                authBox.classList.add('hidden');
+                
+                if (player) {
+                    document.getElementById('logged-player-name').innerText = player.name;
+                    document.getElementById('logged-avatar-container').innerHTML = getAvatarHtml(player, "w-14 h-14");
+                    document.getElementById('profile-foot-input').value = player.foot || "Destro";
+                    document.getElementById('profile-pos-input').value = player.pos || "Linha";
+                }
+            } else {
+                authBox.classList.remove('hidden');
+            }
+
+            // Renderizar Presença
+            const playersList = document.getElementById('players-list');
+            playersList.innerHTML = state.players.map(p => {
+                const isMe = state.loggedPlayerId === p.id;
+                const canEdit = state.adminLevel === 1 || isMe;
+                const isConfirmed = p.confirmed;
+                const inMainList = mainList.some(x => x.id === p.id);
+
+                return `
+                <div class="glass-panel p-3 rounded-xl flex items-center justify-between ${isMe ? 'border-emerald-500/50' : ''}">
+                    <div class="flex items-center gap-3">
+                        ${getAvatarHtml(p, "w-9 h-9")}
+                        <div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="font-bold text-sm text-white">${p.name}</span>
+                                <span class="text-[10px] text-slate-400">(${p.foot ? p.foot.charAt(0) : 'Pendente'})</span>
+                                ${p.pos === 'Goleiro' ? '<span class="text-[10px] bg-blue-500/20 text-blue-400 px-1 rounded">GK</span>' : ''}
+                            </div>
+                            <div class="mt-0.5 flex items-center gap-2">
+                                <span class="text-[10px] px-2 py-0.5 rounded-full ${isConfirmed ? (inMainList ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20') : 'bg-slate-800 text-slate-400'}">
+                                    ${isConfirmed ? (inMainList ? 'Confirmado ✅' : 'Fila de Espera ⏳') : 'Ausente ❌'}
+                                </span>
+                                ${p.paid ? '<span class="text-[10px] text-emerald-400 font-semibold"><i class="fa-solid fa-circle-check"></i> Pago</span>' : '<span class="text-[10px] text-slate-500">Pgto Pendente</span>'}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        ${state.adminLevel === 1 ? `
+                            <button onclick="togglePaymentStatus(${p.id})" class="p-1.5 rounded-lg bg-slate-800 text-xs ${p.paid ? 'text-emerald-400' : 'text-slate-500'}">
+                                <i class="fa-solid fa-dollar-sign"></i>
+                            </button>
+                        ` : ''}
+                        ${canEdit ? `
+                            <button onclick="toggleSelfConfirmation(${p.id})" class="bg-slate-800 hover:bg-slate-700 text-xs px-2.5 py-1.5 rounded-lg border border-slate-700 font-semibold ${p.confirmed ? 'text-red-400' : 'text-emerald-400'}">
+                                ${p.confirmed ? 'Desmarcar' : 'Confirmar'}
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `}).join('');
+
+            // Renderizar Lista de Espera
+            const waitingContainer = document.getElementById('waiting-list-container');
+            const waitingListDiv = document.getElementById('waiting-list');
+            if(waitingList.length > 0) {
+                waitingContainer.classList.remove('hidden');
+                waitingListDiv.innerHTML = waitingList.map((p, idx) => `
+                    <div class="bg-slate-900/80 p-2 rounded-xl text-xs flex justify-between items-center text-slate-300">
+                        <div class="flex items-center gap-2">
+                            ${getAvatarHtml(p, "w-6 h-6")}
+                            <span>${idx + 1}º ${p.name}</span>
+                        </div>
+                        <span class="text-[10px] text-amber-400 font-bold">Aguardando Vaga</span>
+                    </div>
+                `).join('');
+            } else {
+                waitingContainer.classList.add('hidden');
+            }
+
+            // Times Sorteados
+            const teamsContainer = document.getElementById('drawn-teams-container');
+            if(state.teams.length > 0) {
+                const colors = ['border-emerald-500', 'border-blue-500', 'border-amber-500', 'border-purple-500'];
+                teamsContainer.innerHTML = state.teams.map((team, index) => {
+                    const totalStars = team.reduce((acc, curr) => acc + (curr.stars || 3), 0);
+                    return `
+                    <div class="glass-panel rounded-2xl p-4 border-l-4 ${colors[index % colors.length]}">
+                        <h4 class="font-bold text-white text-sm mb-2 flex justify-between items-center">
+                            <span>Time ${index + 1}</span>
+                            <span class="text-xs text-slate-400 font-normal">Força: ${totalStars} ⭐ | ${team.length} Jogadores</span>
+                        </h4>
+                        <div class="space-y-1">
+                            ${team.map(p => `
+                                <div class="flex justify-between items-center text-xs text-slate-300 py-1 border-b border-slate-800/50 last:border-0">
+                                    <div class="flex items-center gap-2">
+                                        ${getAvatarHtml(p, "w-6 h-6")}
+                                        <span>${p.name} <span class="text-[10px] text-slate-500">(${p.foot})</span></span>
+                                    </div>
+                                    <span class="text-[10px] text-amber-400">${'★'.repeat(p.stars || 3)}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `}).join('');
+            } else {
+                teamsContainer.innerHTML = '<p class="text-xs text-slate-400 text-center py-6">Nenhum sorteio foi realizado ainda para o próximo jogo.</p>';
+            }
+
+            // Tabela de Artilharia (Stats)
+            const statsBody = document.getElementById('stats-table-body');
+            const sortedByGoals = [...state.players].sort((a, b) => (b.goals || 0) - (a.goals || 0));
+            statsBody.innerHTML = sortedByGoals.map(p => `
+                <tr>
+                    <td class="p-2 font-semibold text-white flex items-center gap-2">
+                        ${getAvatarHtml(p, "w-6 h-6")}
+                        <span>${p.name} ${p.pos === 'Goleiro' ? '🧤' : ''}</span>
+                    </td>
+                    <td class="p-2 text-center text-[11px] text-slate-400">${p.foot}</td>
+                    <td class="p-2 text-center font-bold text-emerald-400">${p.goals || 0}</td>
+                    <td class="p-2 text-center font-bold text-blue-400">${p.assists || 0}</td>
+                </tr>
+            `).join('');
+
+            // Select Votação MVP
+            const mvpSelect = document.getElementById('mvp-vote-select');
+            mvpSelect.innerHTML = state.players.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+
+            // Pedidos Admin
+            document.getElementById('requests-badge').innerText = `${state.requests.length} Pendentes`;
+            const reqList = document.getElementById('requests-list');
+            reqList.innerHTML = state.requests.length ? state.requests.map(r => `
+                <div class="flex items-center justify-between bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
+                    <div>
+                        <p class="text-xs font-bold text-white">${r.name}</p>
+                        <p class="text-[10px] text-amber-400">Solicitação de Acesso</p>
+                    </div>
+                    <button onclick="acceptRequest(${r.id})" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-2.5 py-1 rounded-lg text-[10px]">Aprovar Entrada</button>
+                </div>
+            `).join('') : '<p class="text-xs text-slate-500">Nenhum pedido pendente.</p>';
+
+            // Gestão de Gols no Admin
+            const activeAdminList = document.getElementById('active-members-admin-list');
+            activeAdminList.innerHTML = state.players.map(p => `
+                <div class="flex items-center justify-between bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                    <div class="flex items-center gap-2">
+                        ${getAvatarHtml(p, "w-7 h-7")}
+                        <div>
+                            <p class="text-xs text-slate-200 font-bold">${p.name}</p>
+                            <p class="text-[10px] text-slate-400">Gols: ${p.goals || 0} | Assis: ${p.assists || 0}</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-1">
+                        <button onclick="addGoal(${p.id}, 1)" class="bg-emerald-600/20 text-emerald-400 px-2 py-1 rounded text-[10px] font-bold">+1 Gol</button>
+                        <button onclick="addAssist(${p.id}, 1)" class="bg-blue-600/20 text-blue-400 px-2 py-1 rounded text-[10px] font-bold">+1 Assis</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
